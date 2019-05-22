@@ -10,7 +10,11 @@
     "lintfix": "vue-cli-service lint --fix"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "core-js": "^2.6.5",
+    "element-ui": "^2.8.2",
+    "normalize.css": "^8.0.1",
+    "nprogress": "^0.2.0",
     "vue": "^2.6.10",
     "vue-router": "^3.0.3",
     "vuex": "^3.0.1"
@@ -36,7 +40,16 @@
       "plugin:vue/essential",
       "@vue/standard"
     ],
-    "rules": {},
+    "rules": {
+      "semi": [
+        "error",
+        "always"
+      ],
+      "no-undef": 0,
+      "missing-semicolon-after-character-reference": false,
+      "space-before-function-paren": "off",
+      "no-eval": "off"
+    },
     "parserOptions": {
       "parser": "babel-eslint"
     }
