@@ -1,5 +1,9 @@
 /* eslint-disable */
+let path = require('path');
 
+function resolve(dir) {
+  return path.join(__dirname, dir)
+}
 module.exports = {
   // 基本路径
 // 	baseUrl: './',
@@ -31,6 +35,11 @@ module.exports = {
     // if(process.env.NODE_ENV === 'production') { // 为生产环境修改配置...process.env.NODE_ENV !== 'development'
     // } else { // 为开发环境修改配置...
     // }
+    //设置别名
+    config.resolve.alias
+      .set('@', resolve('src'))
+      .set('@api', resolve('src/api/api'))//接口地址
+      .set('@assets', resolve('src/assets'))
   },
   // 调整 webpack 配置 https://cli.vuejs.org/zh/guide/webpack.html#%E7%AE%80%E5%8D%95%E7%9A%84%E9%85%8D%E7%BD%AE%E6%96%B9%E5%BC%8F
   configureWebpack: config => {
@@ -64,12 +73,7 @@ module.exports = {
     loaderOptions: {
       sass: {
         // 设置css中引用文件的路径，引入通用使用的scss文件（如包含的@mixin）
-        data: `
-				$baseUrl: "/";
-				`
-        //				data: `
-        //				$baseUrl: "/";
-        //				`
+        data: `@import "@/assets/scss/global.scss";`
       }
     }
   },

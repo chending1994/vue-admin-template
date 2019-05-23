@@ -6,13 +6,14 @@ import ElementUI from 'element-ui';
 import './styles.scss';
 import '@/styles/index.scss';
 import 'normalize.css/normalize.css';
+import '@/assets/icon/iconfont.css';
 
 Vue.config.productionTip = false;
 
-Vue.use(ElementUI, {
-  size: 'medium'
-});
-
+// Vue.use(ElementUI, {
+//   size: 'medium'
+// });
+Vue.use(ElementUI);
 new Vue({
   router,
   store,

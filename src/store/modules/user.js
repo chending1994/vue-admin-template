@@ -6,7 +6,8 @@ const user = {
   state: {
     token: getToken(),
     name: '',
-    userId: ''
+    userId: '',
+    roles: ['admin']
   },
 
   mutations: {
@@ -18,6 +19,9 @@ const user = {
     },
     SET_USER_ID: (state, userId) => {
       state.userId = userId;
+    },
+    COMMIT_ROLE(state, roles) {
+      state.roles = roles;
     }
   },
 
