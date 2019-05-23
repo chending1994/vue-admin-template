@@ -8,7 +8,7 @@
         @close="handleClose"
         :collapse="isCollapse"
         @select="select"
-        active-text-color="#bdb7ff"
+        active-text-color="#409EFF"
         router
       >
         <template v-for="item in items">

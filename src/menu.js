@@ -1,15 +1,15 @@
 // 全部菜单
 export const menu = [{
-  icon: 'el-icon-news',
+  icon: 'el-icon-s-home',
   index: 'home',
-  title: '系统首页'
+  title: '首页'
 },
 {
-  icon: 'el-icon-edit',
+  icon: 'el-icon-stopwatch',
   index: 'icon',
   title: '图标',
   subs: [{
-    index: 'elementIcom',
+    index: 'elementIcon',
     title: 'element'
   }, {
     index: 'iconfont',
@@ -17,7 +17,7 @@ export const menu = [{
   }]
 },
 {
-  icon: 'el-icon-setting',
+  icon: 'el-icon-attract',
   index: 'component',
   title: '组件',
   subs: [{
@@ -59,7 +59,7 @@ export const menu = [{
   ]
 },
 {
-  icon: 'el-icon-document',
+  icon: 'el-icon-pie-chart',
   index: 'charts',
   title: '图表',
   subs: [{
@@ -82,7 +82,6 @@ export const menu = [{
     index: 'permissionBtn',
     title: '按钮权限'
   }
-
   ]
 }, {
   icon: 'el-icon-warning',
@@ -93,7 +92,7 @@ export const menu = [{
     title: '404页面'
   }]
 }, {
-  icon: 'el-icon-mobile-phone',
+  icon: 'el-icon-position',
   index: 'https://github.com/zhuyihe/vue-admin-project',
   title: '外部链接'
 }

@@ -15,9 +15,26 @@ export default new Router({
       children: [
         {
           path: '/home',
+          name: 'home',
           component: getComponent('home', 'index'),
           meta: {
             title: '首页'
+          }
+        },
+        {
+          path: '/elementIcon',
+          name: 'elementIcon',
+          component: getComponent('icons', 'elementIcon'),
+          meta: {
+            title: 'element'
+          }
+        },
+        {
+          path: '/iconfont',
+          name: 'iconfont',
+          component: getComponent('icons', 'iconfont'),
+          meta: {
+            title: 'iconfont'
           }
         }
       ]
