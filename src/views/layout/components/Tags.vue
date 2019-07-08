@@ -9,7 +9,7 @@
         :class="{'active': isActive(item.path)}"
       >
         <router-link :to="item.path" @contextmenu.prevent.native="openMenu(item,$event)" class="tags-li-title">{{item.title}}</router-link>
-        <span class="tags-li-icon" @click="closeTags(index,item.path)">
+        <span class="tags-li-icon" @click="closeSelectedTag(item)">
           <i class="el-icon-close"></i>
         </span>
       </li>
@@ -19,7 +19,6 @@
       <li @click="closeOthersTags">关闭其他</li>
       <li @click="closeAllTags">关闭所有</li>
     </ul>
-
     <!-- <div class="tags-close-box">
       <el-dropdown @command="handleCommand">
         <el-button size="mini" type="primary">
@@ -44,7 +43,7 @@ export default {
       top: 0,
       left: 0,
       selectedTag: {}
-    }
+    };
   },
   created() {
     // 判断标签里面是否有值 有的话直接加载
@@ -71,9 +70,9 @@ export default {
     },
     visible(value) {
       if (value) {
-        document.body.addEventListener('click', this.closeMenu)
+        document.body.addEventListener('click', this.closeMenu);
       } else {
-        document.body.removeEventListener('click', this.closeMenu)
+        document.body.removeEventListener('click', this.closeMenu);
       }
     }
   },
@@ -114,47 +113,60 @@ export default {
       }
     },
     closeTags(index, path) {
-      if (this.tagsList.length === 1) {
-        messages('warning', '不可全都关闭');
+      this.tagsList.splice(index, 1);
+      this.$store.commit('TAGES_LIST', this.tagsList);
+      if (this.tagsList.length > 0) {
+        if (path === this.$route.fullPath) {
+          // 如果关闭当前直接跳到下一个
+          this.$router.push(
+            this.$store.state.tagsView.tagsList[this.$store.state.tagsView.tagsList.length - 1]
+          );
+        }
       } else {
-        let tags = this.tagsList.splice(index, 1);
-        this.$store.commit('TAGES_LIST', this.tagsList);
-      }
-      if (path === this.$route.fullPath) {
-        // 如果关闭当前直接跳到下一个
-        this.$router.push(
-          this.$store.state.tagsView.tagsList[this.$store.state.tagsView.tagsList.length - 1]
-        );
+        this.$router.push('/home');
       }
     },
-    openMenu(item,e) {
+    openMenu(item, e) {
       this.visible = true;
       this.selectedTag = item;
-      const offsetLeft = this.$el.getBoundingClientRect().left; 
-      const offsetTop = this.$el.getBoundingClientRect().top; 
+      const offsetLeft = this.$el.getBoundingClientRect().left;
+      const offsetTop = this.$el.getBoundingClientRect().top;
       this.left = e.clientX - offsetLeft + 15;
       this.top = e.clientY - offsetTop;
     },
     closeMenu() {
       this.visible = false;
     },
-    closeSelectedTag(view) {
-      this.$store.dispatch('delVisitedViews', view).then((views) => {
-        if (this.isActive(view.path)) {
-          const latestView = views.slice(-1)[0]
-          if (latestView) {
-            this.$router.push(latestView);
-          } else {
-            this.$router.push('/home')
-          }
+    async closeSelectedTag(view) {
+      const views = await this.$store.dispatch('delVisitedViews', view);
+      if (this.isActive(view.path)) {
+        const latestView = views.slice(-1)[0];
+        if (latestView) {
+          this.$router.push(latestView);
+        } else {
+          this.$router.push('/home');
         }
-      })
-    },
-    closeOthersTags() {
+      }
 
+      // this.$store.dispatch('delVisitedViews', view).then((views) => {
+      //   if (this.isActive(view.path)) {
+      //     const latestView = views.slice(-1)[0];
+      //     if (latestView) {
+      //       this.$router.push(latestView);
+      //     } else {
+      //       this.$router.push('/home');
+      //     }
+      //   }
+      // });
+    },
+    async closeOthersTags() {
+      this.$router.push(this.selectedTag);
+      const res = await this.$store.dispatch('delOthersViews', this.selectedTag);
+      console.log(res);
     },
     closeAllTags() {
-
+      this.$store.dispatch('delAllViews');
+      this.$router.push('/home');
     }
   }
 };

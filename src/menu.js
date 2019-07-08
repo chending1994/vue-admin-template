@@ -10,7 +10,7 @@ export const menu = [{
   title: '图标',
   subs: [{
     index: 'elementIcon',
-    title: 'element'
+    title: 'elementIcon'
   }, {
     index: 'iconfont',
     title: 'iconfont'
