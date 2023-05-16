@@ -38,6 +38,14 @@ export default new Router({
           }
         }
       ]
+    },
+    {
+      path: '/worldmap',
+      name: 'worldmap',
+      component: getComponent('worldmap', 'index'),
+      meta: {
+        title: 'worldmap'
+      }
     }
   ]
 });

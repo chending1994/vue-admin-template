@@ -146,7 +146,7 @@
 // 数字滚动插件
 import countTo from 'vue-count-to';
 // 引入echarts 插件
-import echarts from 'echarts';
+import * as echarts from 'echarts';
 export default {
   name: 'home',
   components: { countTo },

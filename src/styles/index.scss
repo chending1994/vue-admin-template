@@ -31,6 +31,10 @@ html {
 	-webkit-box-sizing: border-box;
 }
 
+html, body {
+	height: 100%;
+}
+
 input[type=button],
 input[type=submit],
 input[type=file],

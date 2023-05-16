@@ -68,6 +68,15 @@ export const menu = [{
   }]
 },
 {
+  icon: 'el-icon-pie-chart',
+  index: 'worldmap',
+  title: '世界地图',
+  subs: [{
+    index: 'worldmap',
+    title: '世界地图'
+  }]
+},
+{
   icon: 'el-icon-question',
   index: 'premission',
   title: '权限测试',
