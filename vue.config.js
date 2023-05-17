@@ -35,6 +35,13 @@ module.exports = {
     // if(process.env.NODE_ENV === 'production') { // 为生产环境修改配置...process.env.NODE_ENV !== 'development'
     // } else { // 为开发环境修改配置...
     // }
+    config.module
+      .rule("mjs")
+      .test(/\.mjs$/)
+      .type("javascript/auto")
+      .include.add(/node_modules/)
+      .end();
+      
     //设置别名
     config.resolve.alias
       .set('@', resolve('src'))

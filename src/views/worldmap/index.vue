@@ -5,174 +5,172 @@
 </template>
 
 <script>
-import * as echarts from "echarts";
-import "echarts-gl";
-import { population } from "@assets/js/population";
+import {
+  request,
+  getCoordinates,
+  numberWithCommas,
+  formatDate,
+} from "@/utils/index";
 
-import bathymetry_bw_composite_4k from "@assets/img/bathymetry_bw_composite_4k.jpg";
-import baseTexture from "@assets/img/baseTexture.jpg";
-import heightTexture from "@assets/img/heightTexture.jpg";
-// import lake from  '@assets/img/lake.hdr';
-import starfield from "@assets/img/starfield.jpg";
+import {
+  GLOBE_IMAGE_URL,
+  BACKGROUND_IMAGE_URL,
+  GEOJSON_URL,
+  // GEOJSON_URL2,
+  CASES_API,
+} from "@/constants";
 
-var ROOT_PATH = "https://echarts.apache.org/examples";
+import Globe from "globe.gl";
+import * as d3 from "d3";
+
+// const colorScale = d3.scaleSequentialPow(d3.interpolateYlOrRd).exponent(1 / 4);
+
+const colorScale = d3.scaleSequential()
+  .domain([0, 4]) // 定义输入域
+  .interpolator(d3.interpolate('#82AEDB', '#410E6C')); // 定义插值范围
+
+// 这里要分为与中国地图一样的四个等级
+const getVal = (feat) => {
+  return feat.covidData.confirmed / feat.properties.POP_EST;
+};
 
 export default {
   name: "worldmap",
   data() {
-    return {};
+    return {
+      world: null,
+      flagName: null,
+      flagEndpoint: "https://corona.lmao.ninja/assets/img/flags",
+      dates: [],
+      countries: [],
+      featureCollection: [],
+      featureCollection2: [],
+    };
   },
   methods: {
     init() {
       // 图表自适应
-      window.onresize = () => {
-        if (this.$refs.worldMap) {
-          echarts.init(this.$refs.worldMap).resize();
-        }
-      };
+      window.onresize = () => {};
     },
     createMap() {
-      let myChart = echarts.init(this.$refs.worldMap);
+      const me = this;
+      // const N = 300;
+      // const gData = [...Array(N).keys()].map(() => ({
+      //   lat: (Math.random() - 0.5) * 180,
+      //   lng: (Math.random() - 0.5) * 360,
+      //   size: Math.random() / 3,
+      //   color: ['red', 'white', 'blue', 'green'][Math.round(Math.random() * 3)]
+      // }));
+      // me.world = Globe()(me.$refs.worldMap)
+      //   .globeImageUrl(GLOBE_IMAGE_URL)
+      //   .backgroundImageUrl(BACKGROUND_IMAGE_URL)
+      //   .pointsData(gData)
+      //   .pointAltitude('size')
+      //   .pointColor('color')
 
-      const data = population
-        .filter(function (dataItem) {
-          return dataItem[2] > 0;
+      me.world = Globe()(this.$refs.worldMap)
+        .globeImageUrl(GLOBE_IMAGE_URL)
+        .backgroundImageUrl(BACKGROUND_IMAGE_URL)
+        .showGraticules(false)
+        .polygonAltitude(0.06)
+        .polygonCapColor((feat) => {
+          return colorScale(getVal(feat))
+          // return '#82AEDB'
         })
-        .map(function (dataItem) {
-          return [dataItem[0], dataItem[1], Math.sqrt(dataItem[2])];
-        });
+        .polygonSideColor(() => "rgba(0, 100, 0, 0.05)")
+        .polygonStrokeColor(() => "#111")
+        .polygonLabel(({ properties: d, covidData: c }) => {
+          if (d.ADMIN === "France") {
+            me.flagName = "fr";
+          } else if (d.ADMIN === "Norway") {
+            me.flagName = "no";
+          } else {
+            me.flagName = d.ISO_A2.toLowerCase();
+          }
 
-      console.log("data----", data);
-      // let option = {
-      //   xAxis: {
-      //     type: 'category',
-      //     data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-      //   },
-      //   yAxis: {
-      //     type: 'value'
-      //   },
-      //   series: [
-      //     {
-      //       data: [150, 230, 224, 218, 135, 147, 260],
-      //       type: 'line'
-      //     }
-      //   ]
-      // }
+          return `
+        <div class="card">
+          <div class="container">
+             <span class="card-title"><b>${d.NAME}</b></span> <br />
+             <div class="card-spacer"></div>
+             <hr />
+             <div class="card-spacer"></div>
+             <span>今日待办工单数据: ${numberWithCommas(c.confirmed)}</span>  <br />
+          </div>
+        </div>
+      `;
+        })
+        .onPolygonHover((hoverD) =>
+          me.world
+            .polygonAltitude((d) => (d === hoverD ? 0.12 : 0.06))
+            .polygonCapColor((d) =>
+              // d === hoverD ? "steelblue" : colorScale(getVal(d))
+              d === hoverD ? "steelblue" :  '#82AEDB'
+            )
+        )
+        .polygonsTransitionDuration(200);
 
-      // let option = {
-      //   visualMap: {
-      //     show: false,
-      //     min: 0,
-      //     max: 60,
-      //     inRange: {
-      //       symbolSize: [1.0, 10.0],
-      //     },
-      //   },
-      //   globe: {
-      //     // environment: ROOT_PATH + "/data-gl/asset/starfield.jpg",
-      //     // heightTexture: ROOT_PATH + '/data-gl/asset/bathymetry_bw_composite_4k.jpg',
-      //     environment: starfield,
-      //     heightTexture: bathymetry_bw_composite_4k,
-      //     displacementScale: 0.05,
-      //     displacementQuality: "high",
-      //     globeOuterRadius: 100,
-      //     baseColor: "#000",
-      //     shading: "realistic",
-      //     realisticMaterial: {
-      //       roughness: 0.2,
-      //       metalness: 0,
-      //     },
-      //     postEffect: {
-      //       enable: true,
-      //       depthOfField: {
-      //         focalRange: 15,
-      //         enable: true,
-      //         focalDistance: 100,
-      //       },
-      //     },
-      //     temporalSuperSampling: {
-      //       enable: true,
-      //     },
-      //     light: {
-      //       ambient: {
-      //         intensity: 0,
-      //       },
-      //       main: {
-      //         intensity: 0.1,
-      //         shadow: false,
-      //       },
-      //       ambientCubemap: {
-      //         texture: ROOT_PATH + "/data-gl/asset/lake.hdr",
-      //         // texture: lake,
-      //         exposure: 1,
-      //         diffuseIntensity: 0.5,
-      //         specularIntensity: 2,
-      //       },
-      //     },
-      //     viewControl: {
-      //       autoRotate: false,
-      //       beta: 180,
-      //       alpha: 20,
-      //       distance: 100,
-      //     },
-      //   },
-      //   series: {
-      //     type: "scatter3D",
-      //     coordinateSystem: "globe",
-      //     blendMode: "lighter",
-      //     symbolSize: 2,
-      //     itemStyle: {
-      //       color: "rgb(50, 50, 150)",
-      //       opacity: 1,
-      //     },
-      //     data: data,
-      //   },
-      // }
+      me.getCases();
+    },
+    async getCases() {
+      const me = this;
+      me.countries = await request(CASES_API);
+      me.featureCollection = (await request(GEOJSON_URL)).features;
 
-      let option = {
-        globe: {
-          baseTexture: heightTexture, // 替换为实际的纹理图片路径
-          heightTexture: heightTexture, // 替换为实际的高程纹理图片路径
-          environment: starfield,
-          displacementScale: 0.1, // 调整地球表面的凹凸感
-          shading: "lambert", // 光照模型，可选值：'lambert'、'realistic'
-          light: {
-            main: {
-              intensity: 1, // 光照强度
-              shadow: false, // 是否显示阴影
-            },
-            ambient: {
-              intensity: 0.5, // 环境光照强度
-            },
-          },
-        },
-        series: [
+      // featureCollection2 = (await request(GEOJSON_URL2)).features.map(d => {
+      //   d.geometry.type = "Polygon";
+      //   d.geometry.coordinates = polygonFromCenter(d.geometry.coordinates);
+      //   return d;
+      // });
+      // featureCollection = featureCollection.concat(featureCollection2);
+
+      // world.polygonsData(countriesWithCovid);
+
+      me.dates = Object.keys(me.countries.China);
+      me.updateCounters();
+      me.updatePolygonsData();
+      me.updatePointOfView();
+    },
+    updateCounters() {},
+    updatePolygonsData() {
+      const me = this;
+      for (let x = 0; x < me.featureCollection.length; x++) {
+        const country = me.featureCollection[x].properties.NAME;
+        if (me.countries[country]) {
+          me.featureCollection[x].covidData = {
+            confirmed: me.countries[country][me.dates[0]].confirmed,
+            deaths: me.countries[country][me.dates[0]].deaths,
+            recoveries: me.countries[country][me.dates[0]].recoveries,
+          };
+        } else {
+          me.featureCollection[x].covidData = {
+            confirmed: 0,
+            deaths: 0,
+            recoveries: 0,
+          };
+        }
+      }
+
+      const maxVal = Math.max(...me.featureCollection.map(getVal));
+      colorScale.domain([0, maxVal]);
+      me.world.polygonsData(me.featureCollection);
+    },
+    async updatePointOfView() {
+      const me = this;
+      // Get coordinates
+      try {
+        const { latitude, longitude } = await getCoordinates();
+
+        me.world.pointOfView(
           {
-            type: "globe",
-            globeRadius: 100,
-            baseTexture: heightTexture, // 替换为实际的纹理图片路径
-            heightTexture: heightTexture, // 替换为实际的高程纹理图片路径
-            environment: starfield,
-            displacementScale: 0.1, // 调整地球表面的凹凸感
-            shading: "lambert", // 光照模型，可选值：'lambert'、'realistic'
-            light: {
-              main: {
-                intensity: 1, // 光照强度
-                shadow: false, // 是否显示阴影
-              },
-              ambient: {
-                intensity: 0.5, // 环境光照强度
-              },
-            },
-            viewControl: {
-              autoRotate: true, // 自动旋转
-              autoRotateSpeed: 10, // 自动旋转速度
-            },
+            lat: latitude,
+            lng: longitude,
           },
-        ],
-      };
-
-      myChart.setOption(option);
+          1000
+        );
+      } catch (e) {
+        console.log("Unable to set point of view.");
+      }
     },
   },
   mounted() {
