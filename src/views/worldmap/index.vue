@@ -25,9 +25,15 @@ import * as d3 from "d3";
 
 // const colorScale = d3.scaleSequentialPow(d3.interpolateYlOrRd).exponent(1 / 4);
 
-const colorScale = d3.scaleSequential()
+const markerSvg = `<svg viewBox="-4 0 36 36">
+    <path fill="currentColor" d="M14,0 C21.732,0 28,5.641 28,12.6 C28,23.963 14,36 14,36 C14,36 0,24.064 0,12.6 C0,5.641 6.268,0 14,0 Z"></path>
+    <circle fill="black" cx="14" cy="14" r="7"></circle>
+  </svg>`;
+
+const colorScale = d3
+  .scaleSequential()
   .domain([0, 4]) // 定义输入域
-  .interpolator(d3.interpolate('#82AEDB', '#410E6C')); // 定义插值范围
+  .interpolator(d3.interpolate("#82AEDB", "#410E6C")); // 定义插值范围
 
 // 这里要分为与中国地图一样的四个等级
 const getVal = (feat) => {
@@ -72,9 +78,28 @@ export default {
         .globeImageUrl(GLOBE_IMAGE_URL)
         .backgroundImageUrl(BACKGROUND_IMAGE_URL)
         .showGraticules(false)
-        .polygonAltitude(0.06)
+        .htmlElement((d) => {
+          const el = document.createElement("div");
+          el.innerHTML = markerSvg;
+          el.style.color = d.color;
+          el.style.width = `${d.size}px`;
+
+          el.style["pointer-events"] = "auto";
+          el.style.cursor = "pointer";
+          el.onclick = () => console.info(d);
+          return el;
+        })
+        // .labelLat((d) => d.lat)
+        // .labelLng((d) => d.lng)
+        // .labelText((d) => d.label)
+        // .labelSize((d) => Math.sqrt(d.pop_max) * 4e-4)
+        // .labelDotRadius((d) => Math.sqrt(d.pop_max) * 4e-4)
+        // .labelColor(() => "rgba(255, 165, 0, 0.75)")
+        // .labelResolution(2)
+
+        .polygonAltitude(0.01)
         .polygonCapColor((feat) => {
-          return colorScale(getVal(feat))
+          return colorScale(getVal(feat));
           // return '#82AEDB'
         })
         .polygonSideColor(() => "rgba(0, 100, 0, 0.05)")
@@ -95,19 +120,24 @@ export default {
              <div class="card-spacer"></div>
              <hr />
              <div class="card-spacer"></div>
-             <span>今日待办工单数据: ${numberWithCommas(c.confirmed)}</span>  <br />
+             <span>今日待办工单数据: ${numberWithCommas(
+               c.confirmed
+             )}</span>  <br />
           </div>
         </div>
       `;
         })
         .onPolygonHover((hoverD) =>
           me.world
-            .polygonAltitude((d) => (d === hoverD ? 0.12 : 0.06))
+            .polygonAltitude((d) => (d === hoverD ? 0.02 : 0.01))
             .polygonCapColor((d) =>
               // d === hoverD ? "steelblue" : colorScale(getVal(d))
-              d === hoverD ? "steelblue" :  '#82AEDB'
+              d === hoverD ? "steelblue" : colorScale(getVal(d))
             )
         )
+        .onZoom((zoom) => {
+          console.log('zoom---', zoom);
+        })
         .polygonsTransitionDuration(200);
 
       me.getCases();
@@ -129,6 +159,8 @@ export default {
       me.dates = Object.keys(me.countries.China);
       me.updateCounters();
       me.updatePolygonsData();
+      me.updatelabelsData();
+      me.updateHtmlElementsData();
       me.updatePointOfView();
     },
     updateCounters() {},
@@ -155,6 +187,55 @@ export default {
       colorScale.domain([0, maxVal]);
       me.world.polygonsData(me.featureCollection);
     },
+    updatelabelsData() {
+      const me = this;
+      me.world.labelsData([
+        {
+          lat: 113.953558,
+          lng: 22.542236,
+          label: "Apollo 11",
+          program: "Apollo",
+          agency: "NASA",
+          date: "1969-7-20",
+          url: "https://en.wikipedia.org/wiki/Apollo_11",
+          pop_max: 832,
+          pop_min: 832,
+        },
+        {
+          lat: 115.591609,
+          lng: 28.858744,
+          label: "Apollo 12",
+          program: "Apollo",
+          agency: "NASA",
+          date: "1969-11-19",
+          url: "https://en.wikipedia.org/wiki/Apollo_12",
+          pop_max: 29579,
+          pop_min: 29000,
+        },
+        {
+          lat: 104.071814,
+          lng: 30.578527,
+          label: "Apollo 14",
+          program: "Apollo",
+          agency: "NASA",
+          date: "1971-2-5",
+          url: "https://en.wikipedia.org/wiki/Apollo_14",
+          pop_max: 36281,
+          pop_min: 5342,
+        },
+      ]);
+    },
+    updateHtmlElementsData() {
+      const me = this;
+      const N = 30;
+      const gData = [...Array(N).keys()].map(() => ({
+        lat: (Math.random() - 0.5) * 180,
+        lng: (Math.random() - 0.5) * 360,
+        size: 10,
+        color: "yellow",
+      }));
+      me.world.htmlElementsData(gData);
+    },
     async updatePointOfView() {
       const me = this;
       // Get coordinates
@@ -165,6 +246,7 @@ export default {
           {
             lat: latitude,
             lng: longitude,
+            altitude: 2
           },
           1000
         );
